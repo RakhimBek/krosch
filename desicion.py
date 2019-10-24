@@ -1,3 +1,2 @@
-
 def decision(task, current_point):
-    return 1
+    return {"goto": 1, "car": "sb0"}
