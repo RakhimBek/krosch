@@ -9,6 +9,9 @@ server_port_prod = '80'
 server_ip_test = 'localhost'
 server_port_test = '5000'
 
+websockets_host_test = 'localhost'
+websockets_port_test = 8765
+
 def test_address():
     return 'http://' + server_ip_test + ':' + server_port_test
 
