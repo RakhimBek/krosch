@@ -13,15 +13,17 @@ def run():
 
         #loading request
         try:
-            request = await json.loads(websocket.recv())
+
+            request = await websocket.recv()
+            #request = json.loads(request)
         except Exception as e:
             print('Error: ', e)
             return
 
-        print(request[0])
+        print(request)
 
         # parsing request
-        if request[0] == 'team':
+        if request == 'team':
             token = rsp.test_init_response('token')
             routes = rsp.test_init_response('routes')
             points = rsp.test_init_response('points')
@@ -37,7 +39,7 @@ def run():
                 print('Error: ', e)
                 return
 
-        if request[0] == 'goto':
+        if request == 'goto':
             #parse goto json parameters
             point = int(request['goto'])
             car = str(request['car'])
