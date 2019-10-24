@@ -8,6 +8,9 @@ import websockets
 import json
 
 # status / token / need recovery connect/ allcarsum
+from clusterize import get_regions
+from networkx_util import routes_to_graph, points_map, traffic_to_graph
+
 current_state = [0, '', False, 0]
 # save mode close soket  -  pos,car, было отправлено
 saveMode = [0, '', False]
@@ -19,6 +22,16 @@ routes = []
 points = []
 # traffic
 traffic = []
+
+# контекст
+context = {
+    "traffic": {},
+    "routes": {},
+    "cars": {},
+    "last_traffic": {},
+    "points": {},
+    "visited": []
+}
 
 
 def start():
@@ -61,24 +74,26 @@ def run():
             if current_state[0] == 2:
                 routesR = await websocket.recv()
                 print(f"< {routesR}")
-                routes.extend(json.loads(routesR)["routes"])
+                routes_json = json.loads(routesR)["routes"]
+                context["routes"] = routes_to_graph(routes_json)
                 current_state[0] += 1
 
             # Server: { "points":[{"p":0,"money":13966},{"p ...
             if current_state[0] == 3:
                 pointsR = await websocket.recv()
                 print(f"< {pointsR}")
-                points.extend(json.loads(pointsR)["points"])
+                context["points"] = points_map(json.loads(pointsR)["points"])
                 current_state[0] += 1
 
             # Server: { "traffic":[{"a":0,"b":1,"jam":"1.46"},{"a"...
             if current_state[0] == 4:
                 trafficR = await websocket.recv()
                 print(f"< {trafficR}")
-                traffic.clear()
-                traffic.extend(json.loads(trafficR)["traffic"])
+                context["traffic"] = traffic_to_graph(json.loads(trafficR)["traffic"])
+
                 current_state[0] += 1
                 # кластеризация
+                context["regions"] = get_regions(context["routes"], context["traffic"], 1000)
 
             while True:
                 # Client: { "goto": 2, "car": "sb0" }

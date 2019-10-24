@@ -31,8 +31,20 @@ def points_map(points_data):
 def traffic_to_graph(routes):
     g = nx.Graph()
     for route in routes:
-        g.add_edge(route["a"], route["b"], weight=route["jam"])
+        g.add_edge(route["a"], route["b"], weight=float(route["jam"]))
     return g
+
+
+# расстояние между данными точками
+def distance(routes, current_traffic, from_point, to_point):
+    home_time = routes.get_edge_data(from_point, to_point).get("weight")
+    home_jam = current_traffic.get_edge_data(from_point, to_point).get("weight")
+    return home_jam * home_time
+
+
+# Расстояние до целевой точки от данной
+def home_distance_from(routes, current_traffic, from_point):
+    return distance(routes, current_traffic, from_point, 1)
 
 
 if __name__ == '__main__':

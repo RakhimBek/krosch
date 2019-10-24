@@ -1,17 +1,5 @@
-from clusterize import clusterize
-from networkx_util import routes_to_graph, traffic_to_graph, points_map
-
-
-# расстояние между данными точками
-def distance(routes, current_traffic, from_point, to_point):
-    home_time = routes.get_edge_data(from_point, to_point).get("weight")
-    home_jam = current_traffic.get_edge_data(from_point, to_point).get("weight")
-    return home_jam * home_time
-
-
-# Расстояние до целевой точки от данной
-def home_distance_from(routes, current_traffic, from_point):
-    return distance(routes, current_traffic, from_point, 1)
+from clusterize import get_regions
+from networkx_util import routes_to_graph, traffic_to_graph, points_map, home_distance_from, distance
 
 
 # visited - посещенные вершины
@@ -67,5 +55,5 @@ if __name__ == '__main__':
         [{"p": 0, "money": 188}, {"p": 1, "money": 1000}, {"p": 2, "money": 100}]
     )
 
-    clusters = clusterize(route_graph, traffic_graph, 10)
+    clusters = get_regions(route_graph, traffic_graph, 10)
     print(decision([0, 1], route_graph, point_map, clusters, traffic_graph, 0, {"id": "sp0", "volume": 1000}, 100))
