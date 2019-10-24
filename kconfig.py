@@ -3,7 +3,7 @@
 # all Configuration
 
 
-server_ip_prod = '522b9735.ngrok.io'
+server_ip_prod = 'c0194471.ngrok.io'
 server_port_prod = '80'
 
 server_ip_test = 'localhost'
