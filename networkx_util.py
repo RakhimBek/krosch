@@ -37,5 +37,9 @@ if __name__ == '__main__':
     traffic = [{"a": 0, "b": 3, "jam": 1.9}, {"a": 0, "b": 5, "jam": 1.2}, {"a": 0, "b": 6, "jam": 1.1}]
 
     graph = traffic_to_graph(traffic)
+    print(graph.number_of_nodes())
+    for edge in graph.edges:
+        print(edge)
+
     print(graph.get_edge_data(0, 3))
     print(graph.get_edge_data(3, 0))
