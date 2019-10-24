@@ -48,4 +48,4 @@ if __name__ == '__main__':
     )
 
     clusters = clusterize(route_graph, traffic_graph, 10)
-    print(decision([], route_graph, point_graph, clusters, traffic_graph, 0, {"id": "sp0"}))
+    print(decision([], route_graph, point_graph, clusters, traffic_graph, 0, {"id": "sp0", "volume": 1000}))
