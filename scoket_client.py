@@ -65,7 +65,7 @@ def run():
                 print(f"< {greeting}")
                 request = json.loads(greeting)
                 current_state[1] = request["token"]
-                carsJ = request["cars"];
+                carsJ = request["cars"]
                 for car in carsJ:
                     cars[car] = [0, 0]
                 current_state[0] = 2
