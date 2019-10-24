@@ -4,14 +4,13 @@ def append_or_insert(clusters, x, y):
     else:
         clusters[x] = [y]
 
-'''
-Точки на расстояний size
-'''
+
+# Точки на расстоянии size
 def clusterize(timed_edges, size):
     clusters = {}
     for edge in timed_edges:
         if edge["time"] <= size:
-            a, b = int(edge["a"]), int(edge["b"])
+            a, b = edge["a"], edge["b"]
             append_or_insert(clusters, a, b)
             append_or_insert(clusters, b, a)
 
