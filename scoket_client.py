@@ -30,7 +30,7 @@ context = {
     "cars": {},
     "last_traffic": {},
     "points": {},
-    "visited": []
+    "visited": set()
 }
 
 
@@ -120,9 +120,10 @@ def run():
                 if current_state[0] == 7:
                     pointR = await  websocket.recv()
                     print(f"< {pointR}")
-                    pointJ = json.loads(pointR)
-                    cars[pointJ["car"]] = [pointJ["point"], pointJ["carsum"]]
-                    current_state[0] += 1
+                    point_json = json.loads(pointR)
+                    cars[point_json["car"]] = [point_json["point"], point_json["carsum"]]
+                    context["visited"].add(int(point_json["point"]))
+                    current_state[0] = 8
 
                 # Server: { "traffic":[{"a":0,"b":1,"jam":"1.40"},{"a":0,"b":3,"jam":"1
                 if current_state[0] == 8:
@@ -137,7 +138,8 @@ def run():
 
 if __name__ == '__main__':
     while True:
-        try:
+        #try:
             run()
-        except:
-            current_state[2] = True
+        #except Exception as e:
+        #    print(str(e))
+        #    current_state[2] = True
