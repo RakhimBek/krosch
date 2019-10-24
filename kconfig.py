@@ -6,8 +6,8 @@
 server_ip_prod = '0.0.0.0'
 server_port_prod = '80'
 
-server_ip_test = '0.0.0.0'
-server_port_test = '80'
+server_ip_test = '522b9735.ngrok.io'
+server_port_test = '5000'
 
 if __name__ == '__main__':
     pass
