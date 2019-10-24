@@ -57,7 +57,7 @@ def run():
             if current_state[0] == 0:
                 await websocket.send(name)
                 print(f"> {name}")
-                current_state[0] += 1
+                current_state[0] = 1
 
             # Server: { "token" : "dd76b4f8191893288054f74385a07e5f", ...
             if current_state[0] == 1:
@@ -68,7 +68,7 @@ def run():
                 carsJ = request["cars"];
                 for car in carsJ:
                     cars[car] = [0, 0]
-                current_state[0] += 1
+                current_state[0] = 2
 
             # Server: { "routes":[{"a":0,"b":1,"time":1 ...
             if current_state[0] == 2:
@@ -76,14 +76,14 @@ def run():
                 print(f"< {routesR}")
                 routes_json = json.loads(routesR)["routes"]
                 context["routes"] = routes_to_graph(routes_json)
-                current_state[0] += 1
+                current_state[0] = 3
 
             # Server: { "points":[{"p":0,"money":13966},{"p ...
             if current_state[0] == 3:
                 pointsR = await websocket.recv()
                 print(f"< {pointsR}")
                 context["points"] = points_map(json.loads(pointsR)["points"])
-                current_state[0] += 1
+                current_state[0] = 4
 
             # Server: { "traffic":[{"a":0,"b":1,"jam":"1.46"},{"a"...
             if current_state[0] == 4:
@@ -91,7 +91,7 @@ def run():
                 print(f"< {trafficR}")
                 context["traffic"] = traffic_to_graph(json.loads(trafficR)["traffic"])
 
-                current_state[0] += 1
+                current_state[0] = 5
                 # кластеризация
                 context["regions"] = get_regions(context["routes"], context["traffic"], 1000)
 
@@ -106,7 +106,7 @@ def run():
                     saveMode[2] = False
                     print(f"> {goto}")
                     await websocket.send(goto)
-                    current_state[0] += 1
+                    current_state[0] = 6
 
                 # Server: {"teamsum":115906}
                 if current_state[0] == 6:
@@ -114,7 +114,7 @@ def run():
                         teamsum = await  websocket.recv()
                         current_state[3] += int(json.loads(teamsum)["teamsum"])
                         print(f"< {teamsum}")
-                    current_state[0] += 1
+                    current_state[0] = 7
 
                 # Server: { "point": 1, "car": "sb0", "carsum": 0 }
                 if current_state[0] == 7:
