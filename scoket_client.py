@@ -8,23 +8,26 @@ import websockets
 import json
 
 # status / token / need recovery connect/ allcarsum
-current_state = [0, '' ,False,0]
-#save mode close soket  -  pos,car, было отправлено
-saveMode = [0,'',False]
+current_state = [0, '', False, 0]
+# save mode close soket  -  pos,car, было отправлено
+saveMode = [0, '', False]
 # cars[name] = [position, carsum]
 cars = {}
-#routes
+# routes
 routes = []
-#points
+# points
 points = []
-#traffic
+# traffic
 traffic = []
+
 
 def start():
     return '''{ "team": "krosch"}'''
 
+
 def sendGoto(goto, car):
-    return '{ "goto": "'+str(goto)+'", "car": "'+car+'" }'
+    return '{ "goto": "' + str(goto) + '", "car": "' + car + '" }'
+
 
 def run():
     async def hello():
@@ -36,43 +39,49 @@ def run():
                 print(f"> {current_state[1]}")
                 current_state[2] = False
 
+            # Client: {"team": "Имя команды"}
             name = start()
-            if current_state[0] == 0 :
+            if current_state[0] == 0:
                 await websocket.send(name)
                 print(f"> {name}")
                 current_state[0] += 1
 
+            # Server: { "token" : "dd76b4f8191893288054f74385a07e5f", ...
             if current_state[0] == 1:
                 greeting = await websocket.recv()
                 print(f"< {greeting}")
                 request = json.loads(greeting)
                 current_state[1] = request["token"]
                 carsJ = request["cars"];
-                for i in range(len(carsJ)):
-                    cars[carsJ[i]] = [0,0]
+                for car in carsJ:
+                    cars[car] = [0, 0]
                 current_state[0] += 1
 
+            # Server: { "routes":[{"a":0,"b":1,"time":1 ...
             if current_state[0] == 2:
                 routesR = await websocket.recv()
                 print(f"< {routesR}")
                 routes.extend(json.loads(routesR)["routes"])
                 current_state[0] += 1
 
+            # Server: { "points":[{"p":0,"money":13966},{"p ...
             if current_state[0] == 3:
                 pointsR = await websocket.recv()
                 print(f"< {pointsR}")
                 points.extend(json.loads(pointsR)["points"])
                 current_state[0] += 1
 
+            # Server: { "traffic":[{"a":0,"b":1,"jam":"1.46"},{"a"...
             if current_state[0] == 4:
                 trafficR = await websocket.recv()
                 print(f"< {trafficR}")
                 traffic.clear()
                 traffic.extend(json.loads(trafficR)["traffic"])
                 current_state[0] += 1
-
+                # кластеризация
 
             while True:
+                # Client: { "goto": 2, "car": "sb0" }
                 if current_state[0] == 5:
                     if saveMode[2] == False:
                         saveMode[0] = random.randint(0, 9)
@@ -84,6 +93,7 @@ def run():
                     await websocket.send(goto)
                     current_state[0] += 1
 
+                # Server: {"teamsum":115906}
                 if current_state[0] == 6:
                     if saveMode[0] == 1:
                         teamsum = await  websocket.recv()
@@ -91,13 +101,15 @@ def run():
                         print(f"< {teamsum}")
                     current_state[0] += 1
 
+                # Server: { "point": 1, "car": "sb0", "carsum": 0 }
                 if current_state[0] == 7:
                     pointR = await  websocket.recv()
                     print(f"< {pointR}")
                     pointJ = json.loads(pointR)
-                    cars[pointJ["car"]] = [pointJ["point"],pointJ["carsum"]]
+                    cars[pointJ["car"]] = [pointJ["point"], pointJ["carsum"]]
                     current_state[0] += 1
 
+                # Server: { "traffic":[{"a":0,"b":1,"jam":"1.40"},{"a":0,"b":3,"jam":"1
                 if current_state[0] == 8:
                     trafficR = await  websocket.recv()
                     print(f"< {trafficR}")
@@ -107,10 +119,10 @@ def run():
 
     asyncio.get_event_loop().run_until_complete(hello())
 
-if __name__ == '__main__':
-    while True :
-        # try:
-            run()
-        # except:
-        #     current_state[2] = True
 
+if __name__ == '__main__':
+    while True:
+        try:
+            run()
+        except:
+            current_state[2] = True
