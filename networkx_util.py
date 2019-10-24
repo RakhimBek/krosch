@@ -19,11 +19,13 @@ def routes_to_graph(routes):
     return g
 
 
-def points_to_graph(routes):
-    g = nx.Graph()
-    for route in routes:
-        g.add_edge(route["a"], route["b"], weight=route["money"])
-    return g
+# [{"p":0,"money":0},{"p":1,"money":0}...
+def points_map(points_data):
+    points = {}
+    for point_data in points_data:
+        points[point_data["p"]] = point_data["money"]
+
+    return points
 
 
 def traffic_to_graph(routes):
