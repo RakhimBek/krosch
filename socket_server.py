@@ -32,9 +32,7 @@ def run():
         print(f"< {name}")
 
         await websocket.send(response_team())
-        await websocket.send(response_routes())
-        await websocket.send(response_points())
-        await websocket.send(response_traffic())
+        await websocket.send(response_routes()+response_points()+response_traffic())
 
         while True:
             name = await websocket.recv()
