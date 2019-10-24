@@ -4,9 +4,11 @@
 
 import asyncio
 import websockets
+import json
 
 def start():
-    return '{ "team": "krosch"}'
+
+    return json.loads('''{ "team": "krosch"}''')
 
 def sendGoto(goto, car):
     return '{ "goto": '+str(goto)+', "car": "'+car+'" }'
