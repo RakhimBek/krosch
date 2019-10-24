@@ -50,14 +50,14 @@ def decision(visited, routes, points, regions, current_traffic, current_point, c
 
 if __name__ == '__main__':
     route_graph = routes_to_graph(
-        [{"a": 0, "b": 3, "time": 9}, {"a": 0, "b": 5, "time": 12}, {"a": 0, "b": 6, "time": 7}]
+        [{"a": 0, "b": 1, "time": 9}, {"a": 0, "b": 2, "time": 12}, {"a": 1, "b": 2, "time": 7}]
     )
     traffic_graph = traffic_to_graph(
-        [{"a": 0, "b": 3, "jam": 1.1}, {"a": 0, "b": 5, "jam": 1.2}, {"a": 0, "b": 6, "jam": 1}]
+        [{"a": 0, "b": 1, "jam": 1.1}, {"a": 0, "b": 2, "jam": 1.2}, {"a": 1, "b": 2, "jam": 1}]
     )
     point_graph = points_to_graph(
-        [{"a": 0, "b": 3, "money": 188}, {"a": 0, "b": 5, "money": 1000}, {"a": 0, "b": 6, "money": 100}]
+        [{"a": 0, "b": 1, "money": 188}, {"a": 0, "b": 2, "money": 1000}, {"a": 1, "b": 2, "money": 100}]
     )
 
     clusters = clusterize(route_graph, traffic_graph, 10)
-    print(decision([], route_graph, point_graph, clusters, traffic_graph, 0, {"id": "sp0", "volume": 1000}))
+    print(decision([0, 1], route_graph, point_graph, clusters, traffic_graph, 0, {"id": "sp0", "volume": 1000}))
