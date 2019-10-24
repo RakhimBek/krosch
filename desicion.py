@@ -21,13 +21,21 @@ def home_distance_from(routes, current_traffic, from_point):
 # current_traffic - текущая дорожная ситуация
 # current_point - текущая точка
 # car_info - описание машины {id, volume} = {ИД, свободное объем}
-def decision(visited, routes, points, regions, current_traffic, current_point, car_info):
+# remained_distance - оставшееся расстояние(время)
+def decision(visited, routes, points, regions, current_traffic, current_point, car_info, remained_distance):
     region = regions[current_point]
     remained = [x for x in region if x not in visited]
     home_distance = home_distance_from(routes, current_traffic, current_point)
     weighted_points = []
     for point in remained:
-        point_home_distance = home_distance_from(routes, current_traffic, point)
+        xy_distance = distance(routes, current_traffic, current_point, point)
+        yz_distance = home_distance_from(routes, current_traffic, point)
+        if (xy_distance + yz_distance) > remained_distance:
+            return {
+                "goto": 1,
+                "car": car_info["id"]
+            }
+
         time = routes.get_edge_data(current_point, point).get("weight")
         jam = current_traffic.get_edge_data(current_point, point).get("weight")
         money = points.get_edge_data(current_point, point).get("weight")
@@ -60,4 +68,4 @@ if __name__ == '__main__':
     )
 
     clusters = clusterize(route_graph, traffic_graph, 10)
-    print(decision([0, 1], route_graph, point_graph, clusters, traffic_graph, 0, {"id": "sp0", "volume": 1000}))
+    print(decision([0, 1], route_graph, point_graph, clusters, traffic_graph, 0, {"id": "sp0", "volume": 1000}, 100))
