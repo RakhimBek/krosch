@@ -6,7 +6,7 @@ import asyncio
 import random
 import websockets
 
-position = 0
+current_state = [0,'']
 
 def start():
     return '''{ "team": "krosch"}'''
@@ -15,13 +15,20 @@ def sendGoto(goto, car):
     return '{ "goto": "'+str(goto)+'", "car": "'+car+'" }'
 
 def run():
-    async def hello(position):
+    async def hello(current_state):
         uri = "ws://localhost:8765"
         async with websockets.connect(uri) as websocket:
+            position = current_state[0]
+
+            if position == -1:
+                await websocket.send(current_state[1])
+                position += 1
+
             name = start()
             if position == 0 :
                 await websocket.send(name)
                 print(f"> {name}")
+                current_state[1] = 'sad'
                 position += 1
 
             if position == 1:
@@ -68,7 +75,7 @@ def run():
                     print(f"< {traffic}")
                     position = 5
 
-    asyncio.get_event_loop().run_until_complete(hello(position))
+    asyncio.get_event_loop().run_until_complete(hello(current_state))
 
 if __name__ == '__main__':
     while True :
