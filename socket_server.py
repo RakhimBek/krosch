@@ -36,10 +36,10 @@ def run():
         await websocket.send(response_points())
         await websocket.send(response_traffic())
 
-        for x in range(6):
+        while True:
             name = await websocket.recv()
             print(f"< {name}")
-            if re.search('goto": 1,"', name) is not None :
+            if re.search('"1"', name) is not None :
                 await websocket.send(response_teamsum())
             await websocket.send(response_points())
             await websocket.send(response_traffic())
