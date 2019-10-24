@@ -1,20 +1,49 @@
-#!/usr/bin/env python
+''''
+< { "team": "Имя команды"}
+> { "token" : "12321", "cars:": ["sb1", "sb2"], "level": 1 }
+'''
+import sys
+from flask import Flask, request
+import json
+app = Flask(__name__)
 
-# WS server example
 
-import asyncio
-import websockets
+#@app.route('/')
+#def hello_world():
+#    return 'Hello World!'
 
-async def hello(websocket, path):
-    name = await websocket.recv()
-    print(f"< {name}")
+def response_team():
+    data = '''{ "token" : "12321", "cars:": ["sb1", "sb2"], "level": 1 }'''
+    return data
 
-    greeting = f"Hello {name}!"
+def response_routes():
+    data = '''{"routes": [{a: 1, b, 7, time: 31},
+            { a: 6, b, 30, time: 1}, {a: 10, b, 17, time: 12}, ]}'''
+    return data
 
-    await websocket.send(greeting)
-    print(f"> {greeting}")
+@app.route('/', methods=['POST']) #allow POST requests
+def form_example():
+    if request.method == 'POST':
 
-start_server = websockets.serve(hello, "localhost", 8765)
+        try:
+            app.logger.error(str(request.get_json()))
+            incoming = json.loads(str(request.get_json()))
+        except Exception as e:
+            print(e)
 
-asyncio.get_event_loop().run_until_complete(start_server)
-asyncio.get_event_loop().run_forever()
+        data = response_team()
+
+        response = app.response_class(
+            response=json.dumps(data),
+            status=200,
+            mimetype='application/json'
+        )
+        try:
+            return response
+        except Exception as e:
+            return str(e)
+
+
+
+if __name__ == '__main__':
+    app.run()
