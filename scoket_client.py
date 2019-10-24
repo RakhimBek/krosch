@@ -11,7 +11,7 @@ def start():
     return json.loads('''{ "team": "krosch"}''')
 
 def sendGoto(goto, car):
-    return '{ "goto": '+str(goto)+', "car": "'+car+'" }'
+    return json.loads('{ "goto": "'+str(goto)+'", "car": "'+car+'" }')
 
 def run():
     async def hello():
