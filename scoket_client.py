@@ -7,11 +7,10 @@ import websockets
 import json
 
 def start():
-
-    return json.loads('''{ "team": "krosch"}''')
+    return '''{ "team": "krosch"}'''
 
 def sendGoto(goto, car):
-    return json.loads('{ "goto": "'+str(goto)+'", "car": "'+car+'" }')
+    return '{ "goto": "'+str(goto)+'", "car": "'+car+'" }'
 
 def run():
     async def hello():
@@ -35,9 +34,13 @@ def run():
             print(f"< {traffic}")
 
             for x in range(6):
-                goto = sendGoto(3,"btr")
+                point = 1
+                goto = sendGoto(point,"btr")
                 print(f"> {goto}")
                 await websocket.send(goto)
+                if point == 1:
+                    teamsum = await  websocket.recv()
+                    print(f"< {teamsum}")
 
                 points = await  websocket.recv()
                 print(f"< {points}")
