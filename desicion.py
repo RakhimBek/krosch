@@ -1,13 +1,17 @@
 from clusterize import clusterize
-
 from networkx_util import routes_to_graph, traffic_to_graph, points_to_graph
+
+
+# расстояние между данными точками
+def distance(routes, current_traffic, from_point, to_point):
+    home_time = routes.get_edge_data(from_point, to_point).get("weight")
+    home_jam = current_traffic.get_edge_data(from_point, to_point).get("weight")
+    return home_jam * home_time
 
 
 # Расстояние до целевой точки от данной
 def home_distance_from(routes, current_traffic, from_point):
-    home_time = routes.get_edge_data(from_point, 1).get("weight")
-    home_jam = current_traffic.get_edge_data(from_point, 1).get("weight")
-    return home_jam * home_time
+    return distance(routes, current_traffic, from_point, 1)
 
 
 # visited - посещенные вершины
@@ -23,6 +27,7 @@ def decision(visited, routes, points, regions, current_traffic, current_point, c
     home_distance = home_distance_from(routes, current_traffic, current_point)
     weighted_points = []
     for point in remained:
+        point_home_distance = home_distance_from(routes, current_traffic, point)
         time = routes.get_edge_data(current_point, point).get("weight")
         jam = current_traffic.get_edge_data(current_point, point).get("weight")
         money = points.get_edge_data(current_point, point).get("weight")
