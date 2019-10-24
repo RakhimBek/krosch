@@ -5,6 +5,7 @@
 import asyncio
 import random
 import websockets
+import json
 
 current_state = [0,'',False, 0]
 
@@ -28,12 +29,12 @@ def run():
             if current_state[0] == 0 :
                 await websocket.send(name)
                 print(f"> {name}")
-                current_state[1] = 'sad'
                 current_state[0] += 1
 
             if current_state[0] == 1:
                 greeting = await websocket.recv()
                 print(f"< {greeting}")
+                current_state[1] = 'sad'
                 current_state[0] += 1
 
             if current_state[0] == 2:
@@ -45,7 +46,8 @@ def run():
             while True:
                 if current_state[0] == 3:
                     current_state[3] = random.randint(0, 9)
-                    goto = sendGoto(current_state[3],"btr")
+                    current_state[4] = "btr"
+                    goto = sendGoto(current_state[3], current_state[4])
                     print(f"> {goto}")
                     await websocket.send(goto)
                     current_state[0] += 1
