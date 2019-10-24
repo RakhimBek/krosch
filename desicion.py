@@ -18,14 +18,20 @@ def decision(visited, routes, points, regions, current_traffic, current_point, c
     for point in remained:
         time = routes.get_edge_data(current_point, point).get("weight")
         jam = current_traffic.get_edge_data(current_point, point).get("weight")
-        distance = time * jam
-        weight = distance + points.get_edge_data(current_point, point).get("weight")
-        weighted_points.append((point, weight))
+        money = points.get_edge_data(current_point, point).get("weight")
+        if money <= car_info["volume"]:
+            weight = time * jam + money
+            weighted_points.append((point, weight))
 
-    weighted_points.sort(key=lambda x: x[1])
+    if len(weighted_points) > 0:
+        weighted_points.sort(key=lambda x: x[1])
+        return {
+            "goto": weighted_points[0][0],
+            "car": car_info["id"]
+        }
 
     return {
-        "goto": weighted_points[0][0],
+        "goto": 1,
         "car": car_info["id"]
     }
 
