@@ -15,7 +15,7 @@ from clusterize import get_regions
 from desicion import decision
 from networkx_util import routes_to_graph, points_map, traffic_to_graph
 
-CAR_VOLUME = 1_000_000;
+CAR_VOLUME = 1_000_000
 new_state = [0, datetime.datetime.now()]
 current_state = [0, '', False, 0]
 # save mode close soket  -  pos,car, было отправлено
@@ -43,7 +43,7 @@ context = {
 
 
 def start():
-    return '''{ "team": "bananass"}'''
+    return '''{ "team": "КРОШ"}'''
 
 
 def sendGoto(goto, car):
@@ -99,7 +99,7 @@ async def reader(websocket):
 
 def run():
     async def hello():
-        uri = "ws://172.30.9.50:3000/race"
+        uri = "ws://172.30.9.50:8080/race"
         async with websockets.connect(uri) as websocket:
 
             if current_state[2] == True:
@@ -146,13 +146,14 @@ def run():
                 traffic_json = await receive(websocket)
                 if "traffic" in traffic_json:
                     context["traffic"] = traffic_to_graph(traffic_json["traffic"])
-                    context["regions"] = get_regions(context["routes"], context["traffic"], 1000)
+                    context["regions"] = get_regions(context["routes"], context["traffic"], 700)
 
                 current_state[0] = 5
                 # кластеризация
 
-
+            b = False
             while True:
+                b = not b
                 # Client: { "goto": 2, "car": "sb0" }
                 if current_state[0] == 5:
 
@@ -216,7 +217,11 @@ if __name__ == '__main__':
         try:
             run()
         except Exception as e:
-            e.__traceback__.print_exc(file=sys.stdout)
+            try:
+                e.__traceback__.print_exc(file=sys.stdout)
+            except Exception as e:
+                print(str(e))
+
             if  current_state[1] == '':
                 current_state[0] = 0
             else:

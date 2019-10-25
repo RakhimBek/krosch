@@ -11,37 +11,43 @@ from networkx_util import routes_to_graph, traffic_to_graph, points_map, home_di
 # car_info - описание машины {id, volume} = {ИД, свободное объем}
 # remained_distance - оставшееся расстояние(время)
 def decision(visited, routes, points, regions, current_traffic, current_point, car_info, remained_distance):
-    region = regions[current_point]
-    remained = [x for x in region if x not in visited]
-    home_distance = home_distance_from(routes, current_traffic, current_point)
-    weighted_points = []
-    for point in remained:
-        xy_distance = distance(routes, current_traffic, current_point, point)
-        yz_distance = home_distance_from(routes, current_traffic, point)
-        if (xy_distance + yz_distance) > remained_distance:
+    try:
+        region = regions[current_point]
+        remained = [x for x in region if x not in visited]
+        #home_distance = home_distance_from(routes, current_traffic, current_point)
+        weighted_points = []
+        for point in remained:
+            #xy_distance = distance(routes, current_traffic, current_point, point)
+            #yz_distance = home_distance_from(routes, current_traffic, point)
+            #if (xy_distance + yz_distance) > remained_distance:
+            #    return {
+            #        "goto": 1,
+            #        "car": car_info["id"]
+            #    }
+
+            time = routes.get_edge_data(current_point, point).get("weight")
+            jam = current_traffic.get_edge_data(current_point, point).get("weight")
+            money = points[point]
+            if money <= car_info["volume"]:
+                weight = time * jam #+ money
+                weighted_points.append((point, weight))
+
+        if len(weighted_points) > 0:
+            weighted_points.sort(key=lambda x: x[1])
             return {
-                "goto": 1,
+                "goto": weighted_points[0][0],
                 "car": car_info["id"]
             }
 
-        time = routes.get_edge_data(current_point, point).get("weight")
-        jam = current_traffic.get_edge_data(current_point, point).get("weight")
-        money = points[point]
-        if money <= car_info["volume"]:
-            weight = time * jam + money
-            weighted_points.append((point, weight))
-
-    if len(weighted_points) > 0:
-        weighted_points.sort(key=lambda x: x[1])
         return {
-            "goto": weighted_points[0][0],
+            "goto": 1,
             "car": car_info["id"]
         }
-
-    return {
-        "goto": 1,
-        "car": car_info["id"]
-    }
+    except Exception as e:
+        return {
+            "goto": 1,
+            "car": car_info["id"]
+        }
 
 
 if __name__ == '__main__':
