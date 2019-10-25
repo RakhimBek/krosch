@@ -49,12 +49,13 @@ def sendGoto(goto, car):
 
 def run():
     async def hello():
-        uri = "ws://localhost:8765"
+        uri = "ws://172.30.9.50:8080/race"
         async with websockets.connect(uri) as websocket:
 
             if current_state[2] == True:
-                await websocket.send(current_state[1])
-                print(f"> {current_state[1]}")
+                token = '{"reconnect": "'+ current_state[1] +'"}';
+                await websocket.send(token)
+                print(f"> {token}")
                 current_state[2] = False
 
             # Client: {"team": "Имя команды"}
@@ -163,4 +164,8 @@ if __name__ == '__main__':
             run()
         except Exception as e:
             print(str(e))
-            current_state[2] = True
+            if  current_state[1] == '':
+                current_state[0] = 0
+            else:
+                current_state[2] = True
+
