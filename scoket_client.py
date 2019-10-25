@@ -6,6 +6,7 @@ import asyncio
 import random
 import websockets
 import json
+import datetime
 
 # status / token / need recovery connect/ allcarsum
 from clusterize import get_regions
@@ -13,7 +14,7 @@ from desicion import decision
 from networkx_util import routes_to_graph, points_map, traffic_to_graph
 
 CAR_VOLUME = 1_000_000;
-
+new_state = [0, datetime.datetime.now()]
 current_state = [0, '', False, 0]
 # save mode close soket  -  pos,car, было отправлено
 saveMode = [0, '', False]
@@ -40,12 +41,59 @@ context = {
 
 
 def start():
-    return '''{ "team": "krosch"}'''
+    return '''{ "team": "Кроsh"}'''
 
 
 def sendGoto(goto, car):
     return '{ "goto": "' + str(goto) + '", "car": "' + car + '" }'
+#
+async def writer(websocket):
+    while True:
+        if new_state[0] == 0 :
+            name = start()
+            await websocket.send(name)
+            print(f"> {name}")
+            new_state[0] = 1
+            new_state[1] = datetime.datetime.now()
 
+        if current_state[2] == True:
+            await websocket.send('{ "reconnect" : "' + current_state[1] + '"}')
+            print(f"> {name}")
+            new_state[0] = 3
+            new_state[1] = datetime.datetime.now()
+
+async def reader(websocket):
+    while True:
+        message = await websocket.recv()
+        messageJ = json.loads(message)
+        if "token" in messageJ:
+            # Server: { "token" : "dd76b4f8191893288054f74385a07e5f", ...
+            new_state[0] = 2
+            new_state[1] = datetime.datetime.now()
+            current_state[1] = messageJ["token"]
+            cars_json = messageJ["cars"]
+            for car_id in cars_json:
+                context["cars"][car_id] = {"id": car_id, "volume": CAR_VOLUME}
+        if "routes" in messageJ:
+            # Server: { "routes":[{"a":0,"b":1,"time":1 ...
+            routes_json = messageJ["routes"]
+            context["routes"] = routes_to_graph(routes_json)
+        if "points" in messageJ:
+            # Server: { "points":[{"p":0,"money":13966},{"p ...
+            context["points"] = points_map(messageJ["points"])
+        if "traffic" in messageJ:
+            # Server: { "traffic":[{"a":0,"b":1,"jam":"1.46"},{"a"...
+            context["traffic"] = traffic_to_graph(messageJ["traffic"])
+        if "point" in messageJ:
+            # Server: { "point": 1, "car": "sb0", "carsum": 0 }
+            context["current_point"] = messageJ["point"]
+            context["cars"][messageJ["car"]] = {"id": messageJ["car"],
+                                                  "volume": CAR_VOLUME - messageJ["carsum"]}
+            context["visited"].add(int(messageJ["point"]))
+        print(f"> {message}")
+
+# await asyncio.gather(reader(websocket),
+#                                  writer(websocket))
 
 def run():
     async def hello():
