@@ -4,6 +4,8 @@
 
 import asyncio
 import random
+import sys
+
 import websockets
 import json
 import datetime
@@ -127,24 +129,28 @@ def run():
             # Server: { "routes":[{"a":0,"b":1,"time":1 ...
             if current_state[0] == 2:
                 routes_data_json = await receive(websocket)
-                routes_json = routes_data_json["routes"]
-                context["routes"] = routes_to_graph(routes_json)
+                if "routes" in routes_data_json:
+                    routes_json = routes_data_json["routes"]
+                    context["routes"] = routes_to_graph(routes_json)
                 current_state[0] = 3
 
             # Server: { "points":[{"p":0,"money":13966},{"p ...
             if current_state[0] == 3:
                 traffic_json = await receive(websocket)
-                context["points"] = points_map(traffic_json["points"])
+                if "points" in traffic_json:
+                    context["points"] = points_map(traffic_json["points"])
                 current_state[0] = 4
 
             # Server: { "traffic":[{"a":0,"b":1,"jam":"1.46"},{"a"...
             if current_state[0] == 4:
                 traffic_json = await receive(websocket)
-                context["traffic"] = traffic_to_graph(traffic_json["traffic"])
+                if "traffic" in traffic_json:
+                    context["traffic"] = traffic_to_graph(traffic_json["traffic"])
+                    context["regions"] = get_regions(context["routes"], context["traffic"], 1000)
 
                 current_state[0] = 5
                 # кластеризация
-                context["regions"] = get_regions(context["routes"], context["traffic"], 1000)
+
 
             while True:
                 # Client: { "goto": 2, "car": "sb0" }
@@ -181,10 +187,11 @@ def run():
                 # Server: { "point": 1, "car": "sb0", "carsum": 0 }
                 if current_state[0] == 7:
                     point_json = await receive(websocket)
-                    context["current_point"] = point_json["point"]
-                    context["cars"][point_json["car"]] = {"id": point_json["car"],
-                                                          "volume": CAR_VOLUME - point_json["carsum"]}
-                    context["visited"].add(int(point_json["point"]))
+                    if "point" in point_json:
+                        context["current_point"] = point_json["point"]
+                        context["cars"][point_json["car"]] = {"id": point_json["car"],
+                                                              "volume": CAR_VOLUME - point_json["carsum"]}
+                        context["visited"].add(int(point_json["point"]))
                     current_state[0] = 8
 
                 # Server: { "traffic":[{"a":0,"b":1,"jam":"1.40"},{"a":0,"b":3,"jam":"1
@@ -196,6 +203,7 @@ def run():
 
     async def receive(websocket):
         data = await websocket.recv()
+        print(f"raw data: {data}")
         json_data = json.loads(data)
         print(f"< {json_data}")
         return json_data
@@ -208,7 +216,7 @@ if __name__ == '__main__':
         try:
             run()
         except Exception as e:
-            print(str(e))
+            e.__traceback__.print_exc(file=sys.stdout)
             if  current_state[1] == '':
                 current_state[0] = 0
             else:
