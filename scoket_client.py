@@ -28,6 +28,7 @@ routes = []
 points = []
 # traffic
 traffic = []
+all_data = [False,False,False]
 
 # контекст
 context = {
@@ -43,7 +44,7 @@ context = {
 
 
 def start():
-    return '''{ "team": "bananass"}'''
+    return '''{ "team": "krosch"}'''
 
 
 def sendGoto(goto, car):
@@ -60,7 +61,6 @@ async def writer(websocket):
 
         if current_state[2] == True:
             await websocket.send('{ "reconnect" : "' + current_state[1] + '"}')
-            print(f"> {name}")
             new_state[0] = 3
             new_state[1] = datetime.datetime.now()
 
@@ -99,21 +99,22 @@ async def reader(websocket):
 
 def run():
     async def hello():
-        uri = "ws://172.30.9.50:3000/race"
-        async with websockets.connect(uri) as websocket:
+        while True:
+            uri = "ws://172.30.9.50:8080/race"
+            async with websockets.connect(uri) as websocket:
 
-            if current_state[2] == True:
-                token = '{"reconnect": "'+ current_state[1] +'"}';
-                await websocket.send(token)
-                print(f"> {token}")
-                current_state[2] = False
+                if current_state[2] == True:
+                    token = '{"reconnect": "'+ current_state[1] +'"}';
+                    await websocket.send(token)
+                    print(f"> {token}")
+                    current_state[2] = False
 
-            # Client: {"team": "Имя команды"}
-            name = start()
-            if current_state[0] == 0:
-                await websocket.send(name)
-                print(f"> {name}")
-                current_state[0] = 1
+                # Client: {"team": "Имя команды"}
+                name = start()
+                if current_state[0] == 0:
+                    await websocket.send(name)
+                    print(f"> {name}")
+                    current_state[0] = 1
 
             # Server: { "token" : "dd76b4f8191893288054f74385a07e5f", ...
             if current_state[0] == 1:
@@ -128,27 +129,24 @@ def run():
 
             # Server: { "routes":[{"a":0,"b":1,"time":1 ...
             if current_state[0] == 2:
-                routes_data_json = await receive(websocket)
-                if "routes" in routes_data_json:
-                    routes_json = routes_data_json["routes"]
+                traffic_json = await receive(websocket)
+                if "routes" in traffic_json:
+                    routes_json = traffic_json["routes"]
                     context["routes"] = routes_to_graph(routes_json)
-                current_state[0] = 3
+                    all_data[0]=True
 
             # Server: { "points":[{"p":0,"money":13966},{"p ...
-            if current_state[0] == 3:
-                traffic_json = await receive(websocket)
                 if "points" in traffic_json:
                     context["points"] = points_map(traffic_json["points"])
-                current_state[0] = 4
+                    all_data[1] = True
 
             # Server: { "traffic":[{"a":0,"b":1,"jam":"1.46"},{"a"...
-            if current_state[0] == 4:
-                traffic_json = await receive(websocket)
                 if "traffic" in traffic_json:
                     context["traffic"] = traffic_to_graph(traffic_json["traffic"])
                     context["regions"] = get_regions(context["routes"], context["traffic"], 1000)
-
-                current_state[0] = 5
+                    all_data[2] = True
+                if all_data[0] and all_data[1] and all_data[2]:
+                    current_state[0] = 5
                 # кластеризация
 
 
